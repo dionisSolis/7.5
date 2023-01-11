@@ -1,0 +1,224 @@
+using System;
+namespace qwerty
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            string userInput;
+            bool isRun = true;
+            Library library = new Library();
+
+            Console.WriteLine("Хранилище книг\n");
+
+            while (isRun)
+            {
+                if (!library.ShowInfo())
+                {
+                    Console.WriteLine("Выберите команду:\n1)Добавить книгу \n2)Выйти");
+                    Console.Write("Ввод...");
+                    userInput = Console.ReadLine();
+
+                    switch (userInput)
+                    {
+                        case "1":
+                            List<string> options = new List<string>() { "Название", "Aвтор", "Дата" };
+                            List<string> characteristics = new List<string>();
+
+                            AddBook(userInput, options, characteristics);
+                            library.AddBook(options, characteristics);
+                            break;
+                        case "2":
+                            isRun = false;
+                            break;
+                        default:
+                            Console.WriteLine("\nТакой команды не существует");
+                            break;
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Выберите команду:\n1)Добавить книгу \n2)Удалить книгу \n3)Поиск книги по параметрам \n4)Выйти");
+                    Console.Write("Ввод...");
+                    userInput = Console.ReadLine();
+
+                    switch (userInput)
+                    {
+                        case "1":
+                            List<string> options = new List<string>() { "Название", "Aвтор", "Дата" };
+                            List<string> characteristics = new List<string>();
+
+                            AddBook(userInput, options, characteristics);
+                            library.AddBook(options, characteristics);
+                            break;
+                        case "2":
+                            Console.Write("\nВведите номер книги для удаления: ");
+                            library.RemoveBook(Console.ReadLine());
+                            break;
+                        case "3":
+                            List<string> characteristicsToFind = new List<string>();
+
+                            AddList(characteristicsToFind, userInput, "Ввод параметров для поиска");
+                            library.ShowInfo(characteristicsToFind);
+                            break;
+                        case "4":
+                            isRun = false;
+                            break;
+                        default:
+                            Console.WriteLine("\nТакой команды не существует");
+                            break;
+                    }
+                }
+
+                Console.Write("\nНажмите любую кнопку для обновления...");
+                Console.ReadKey();
+                Console.Clear();
+            }
+        }
+
+        static void AddBook(string userInput, List<string> options, List<string> characteristics)
+        {
+            AddList(options, userInput, "Ввод опций");
+            Console.Clear();
+            Console.WriteLine("Ввод параметров:\n");
+
+            for (int i = 0; i < options.Count; i++)
+            {
+                Console.Write($"{options[i]} - ");
+                characteristics.Add(Console.ReadLine());
+            }
+        }
+        static void AddList(List<string> list, string userInput, string name)
+        {
+            while (userInput != "")
+            {
+                Console.Clear();
+                Console.WriteLine($"{name}\nEnter - Далее; Для добавления пункта - введите его\n\nУказанные пункты: ");
+
+                if (!int.TryParse(userInput, out int result))
+                {
+                    list.Add(userInput);
+                }
+
+                for (int i = 0; i < list.Count; i++)
+                {
+                    Console.Write(list[i] + " | ");
+                }
+                
+                Console.Write("\nВвод...");
+                userInput = Console.ReadLine();
+            }
+        }
+    }
+
+    class Library
+    {
+        private List<Book> books = new List<Book>() {};
+
+        public void AddBook(List<string> options, List<string> chacharacteristics)
+        {
+            books.Add(new Book(options, chacharacteristics));
+            Console.WriteLine("\nКнига добавлена!");
+        }
+
+        public void RemoveBook(string number)
+        {
+            int index = 0;
+
+            if (!int.TryParse(number, out index) || (index - 1) < 0 || (index - 1) >= books.Count)
+            {
+                Console.WriteLine("Неверно веденный номер книги");
+            }
+            else
+            {
+                index = int.Parse(number) - 1;
+                books.RemoveAt(index);
+                Console.WriteLine("\nКнига удалена!");
+            }
+        }
+
+        public bool ShowInfo()
+        {
+            if (books.Count > 0)
+            {
+                for (int i = 0; i < books.Count; i++)
+                {
+                    Console.Write($"{i + 1})\n");
+                    books[i].ShowInfoBook();
+                }
+
+                Console.WriteLine("\n");
+                return true;
+            }
+            else
+            {
+                Console.WriteLine("Пока книг нет\n");
+                return false;
+            }
+        }
+
+        public void ShowInfo(List<string> characteristicsToFind)
+        {
+
+            for (int i = 0; i < books.Count; i++)
+            {
+                if (books[i].ShowInfoBook(characteristicsToFind))
+                {
+                    Console.Write($"{i + 1})\n");
+                    books[i].ShowInfoBook();
+                }
+            }
+        }
+    }
+
+    class Book
+    {
+        public List<string> options;
+        public List<string> characteristics = new List<string>();
+        
+        public Book(List<string> options, List<string> chacharacteristics)
+        {
+            this.options = options;
+            this.characteristics = chacharacteristics;
+        }
+
+        public void ShowInfoBook()
+        {
+            ShowList(options);
+            ShowList(characteristics);
+        }
+
+        public bool ShowInfoBook(List<string> characteristicToFind)
+        {
+            for (int i = 0; i < characteristicToFind.Count; i++)
+            {
+                if (characteristics.Contains(characteristicToFind[i]))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        
+        private void ShowList(List<string> array)
+        {
+            for (int i = 0; i < array.Count; i++)
+            {
+                Console.Write(AddSymbolsToWrite(array[i]));
+            }
+
+            Console.WriteLine();
+        }
+
+        private string AddSymbolsToWrite(string item)
+        {
+            while (item.Length < 25)
+            {
+                item += ' ';
+            }
+
+            return item;
+        }
+    }
+}
